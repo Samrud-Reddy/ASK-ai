@@ -44,8 +44,8 @@ def stringify_image(path):
 
   
   out = []
-  prev_block_no = 0
-  prev_line_no = 0
+  prev_block_no = data["block_num"][0]
+  prev_line_no = data["line_num"][0]
 
   curr_block_list = []
   curr_line = ""
@@ -57,6 +57,9 @@ def stringify_image(path):
     curr_line_no = data["line_num"][i]
 
     if prev_block_no != curr_block_no:
+      if curr_block_list == []:
+        curr_block_list.append(curr_line)
+        
       out.append(curr_block_list)
       
       curr_line = text
@@ -67,19 +70,22 @@ def stringify_image(path):
       continue
       
     if prev_line_no != curr_line_no:
-      curr_block_list.append(curr_line)
-      curr_line = text
+      curr_line += " "+text
 
       prev_line_no = curr_line_no
       continue
 
     curr_line += " " + text
+
   
-  for i in out:
-    print(i)
+  out = [i[0] for i in out]
+
+  out = "\n\n".join(out)
+
+  return out
 
 
 
 
-
-stringify_image("C:\\Users\\samru\\Desktop\\Code\\ASK ai\\textbooks\\chemistry\\AS&A levels\\pages\\test.jpg")
+with open("read.txt", "+w") as f:
+  f.write(stringify_image("C:\\Users\\samru\\Desktop\\Code\\ASK ai\\textbooks\\chemistry\\AS&A levels\\pages\\test.jpg"))
