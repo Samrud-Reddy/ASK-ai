@@ -42,7 +42,19 @@ def invert_dict_list(data):
   
   return converted_data
 
+def flattenlist(nestedlist):  
+    if len(nestedlist) == 0:  
+        return nestedlist  
+    if isinstance(nestedlist[0], list):  
+        return flattenlist(nestedlist[0]) + flattenlist(nestedlist[1:])  
+    return nestedlist[:1] + flattenlist(nestedlist[1:])  
 
+def aray_has_nothing(aray):
+  flattened = flattenlist(aray)
+
+  if flattened == []:
+    return True
+  return False
 
 
 
@@ -106,16 +118,26 @@ def stringify_image(path, treshold = 70):
   # removed none
   out = [[[[[value for value in dim4 if value is not None] for dim4 in dim3] for dim3 in dim2] for dim2 in dim1] for dim1 in out]
 
-  #removes arrays that only contain empty arrays
-  # out = to_lazy(out)
+  #Removes empty pages
+  new_out = []
+  for pages in range(len(out)):
+    if not aray_has_nothing(out[pages]):
+      new_out.append(out[pages])
 
-  return out
+    out = new_out
+  
+  #Removes empty blocks
+  new_out = []
+  for pages in (out):
+    for block in range(len(pages)):
+      if not aray_has_nothing(pages[block]):
+        new_out.append(pages[block])
 
-def to_lazy(out):
-  for page in out:
-    for block in page:
-      if block[0] == []:
-        out.remove(block)
+  out = new_out
+
+  return new_out
+
+
 
 
 
