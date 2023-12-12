@@ -28,13 +28,13 @@ def debug_string(path):
   with open("read.txt", "w+") as f:
     f.write(out)
 
-def stringify_image(path):
+def stringify_image(path, treshold = 70):
   data = pytesseract.image_to_data(Image.open(path), lang="eng", output_type=pytesseract.Output.DICT)
 
   #Remove low conf
   to_remove = []
   for i in range(len(data["level"])):  
-    if data["conf"][i] < 70:
+    if data["conf"][i] < treshold:
       to_remove.append(i)
   
   to_remove.reverse()
