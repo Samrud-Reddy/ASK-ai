@@ -56,8 +56,6 @@ def aray_has_nothing(aray):
     return True
   return False
 
-
-
 def stringify_image(path, treshold = 70):
   data = pytesseract.image_to_data(Image.open(path), lang="eng", output_type=pytesseract.Output.DICT)
 
@@ -115,7 +113,7 @@ def stringify_image(path, treshold = 70):
   cur_page.append(cur_block)
   out.append(cur_page)
 
-  # removed none
+  # removes none
   out = [[[[[value for value in dim4 if value is not None] for dim4 in dim3] for dim3 in dim2] for dim2 in dim1] for dim1 in out]
 
   #Removes empty pages
@@ -129,21 +127,59 @@ def stringify_image(path, treshold = 70):
   #Removes empty blocks
   new_out = []
   for pages in (out):
+    new_pages = []
     for block in range(len(pages)):
       if not aray_has_nothing(pages[block]):
-        new_out.append(pages[block])
-
+        new_pages.append(pages[block])
+    new_out.append(new_pages)
   out = new_out
 
   return new_out
 
 
+def append_images_vertically(image1_path, image2_path, output_path):
+    # Open the images
+    image1 = Image.open(image1_path)
+    image2 = Image.open(image2_path)
 
+    # Get the size of the first image
+    width1, height1 = image1.size
+    
+    # Get the size of the second image
+    width2, height2 = image2.size
 
+    # Calculate the width and height of the combined image
+    max_width = max(width1, width2)
+    total_height = height1 + height2
 
-out = stringify_image("C:\\Users\\samru\\Desktop\\Code\\ASK ai\\textbooks\\chemistry\\AS&A levels\\pages\\test.jpg")
+    # Create a new image with the calculated size
+    new_image = Image.new('RGB', (max_width, total_height))
 
+    # Paste the first image onto the new image
+    new_image.paste(image1, (0, 0))
 
-print(out)
-# with open("read.txt", "+w") as f:
-#   f.write(stringify_image("C:\\Users\\samru\\Desktop\\Code\\ASK ai\\textbooks\\chemistry\\AS&A levels\\pages\\test.jpg"))
+    # Paste the second image below the first one
+    new_image.paste(image2, (0, height1))
+
+    # Save the result
+    new_image.save(output_path)
+
+def separate_dimensions(lst, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
+    result = ""
+    for i, dim1 in enumerate(lst):
+        for j, dim2 in enumerate(dim1):
+            for k, dim3 in enumerate(dim2):
+                for l, dim4 in enumerate(dim3):
+                    for m, word in enumerate(dim4):
+                        result += word
+                        if m < len(dim4) - 1:
+                            result += delimiters[4]
+                    if l < len(dim3) - 1:
+                        result += delimiters[3]
+                if k < len(dim2) - 1:
+                    result += delimiters[2]
+            if j < len(dim1) - 1:
+                result += delimiters[1]
+        if i < len(lst) - 1:
+            result += delimiters[0]
+    return result
