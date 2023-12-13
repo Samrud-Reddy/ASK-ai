@@ -164,7 +164,7 @@ def append_images_vertically(image1_path, image2_path, output_path):
     # Save the result
     new_image.save(output_path)
 
-def separate_dimensions(lst, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
+def format_pytessaract_obj(lst, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
     result = ""
     for i, dim1 in enumerate(lst):
         for j, dim2 in enumerate(dim1):
