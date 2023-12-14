@@ -2,17 +2,11 @@ from pdf2image import convert_from_path
 import pytesseract
 from PIL import Image
 
-import numpy as np
 target_folder = "textbooks\\chemistry\\AS&A_levels"
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\samru\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
-
-# start is 13
-# end is 884
+pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\<Insert name here>\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
 
 starting_page = 13
 ending_page = 884
-
-# ending_page = 13
 
 def make_img(pdf, target_folder, start, end):
   images = convert_from_path(pdf, first_page=start, last_page=end)
@@ -164,13 +158,6 @@ def append_images_vertically(image1_path, image2_path, output_path):
 
     # Save the result
     new_image.save(output_path, 'JPEG')
-
-# skipping page 0 because it's page 13 in reality, which is an odd number
-for x in range (1, 871, 2):
-  append_images_vertically(f"/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/pages/{x}.jpg", 
-  f"/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/pages/{x+1}.jpg", 
-  f"/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/joint_pages/{x}.jpg")
-
 
 def format_pytessaract_obj(lst, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
     result = ""
