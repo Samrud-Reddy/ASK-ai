@@ -3,21 +3,26 @@ import pytesseract
 from PIL import Image
 
 import numpy as np
-# target_folder = "textbooks\\chemistry\\AS&A levels"
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\samru\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+target_folder = "textbooks/chemistry/AS&A_Levels"
+path_to_pdf = "/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/AS&A_levels.pdf"
+pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
 
+# start is 13
+# end is 884
 
-# starting_page = 13
-# ending_page = 884
-
-# ending_page = 13
+starting_page = 13
+ending_page = 884
 
 def make_img(pdf, target_folder, start, end):
   images = convert_from_path(pdf, first_page=start, last_page=end)
 
   for i, item in enumerate(images):
     # Save pages as images in the pdf
-    item.save(target_folder+'\\pages\\'+ "test" +'.jpg', 'JPEG')
+    item.save(target_folder+'/pages/'+ str(i) +'.jpg', 'JPEG')
+
+
+# makes all the images
+# make_img(path_to_pdf, target_folder, starting_page, ending_page)
 
 def debug_string(path):
   data = pytesseract.image_to_data(Image.open(path), lang="eng", output_type=pytesseract.Output.DICT)
@@ -136,7 +141,6 @@ def stringify_image(path, treshold = 70):
 
   return new_out
 
-
 def append_images_vertically(image1_path, image2_path, output_path):
     # Open the images
     image1 = Image.open(image1_path)
@@ -162,7 +166,14 @@ def append_images_vertically(image1_path, image2_path, output_path):
     new_image.paste(image2, (0, height1))
 
     # Save the result
-    new_image.save(output_path)
+    new_image.save(output_path, 'JPEG')
+
+# skipping page 0 because it's page 13 in reality, which is an odd number
+for x in range (1, 871, 2):
+  append_images_vertically(f"/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/pages/{x}.jpg", 
+  f"/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/pages/{x+1}.jpg", 
+  f"/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/joint_pages/{x}.jpg")
+
 
 def format_pytessaract_obj(lst, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
     result = ""
@@ -183,3 +194,4 @@ def format_pytessaract_obj(lst, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", 
         if i < len(lst) - 1:
             result += delimiters[0]
     return result
+
