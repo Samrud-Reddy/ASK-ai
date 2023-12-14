@@ -2,14 +2,6 @@ from pdf2image import convert_from_path
 import pytesseract
 from PIL import Image
 
-import numpy as np
-target_folder = "textbooks/chemistry/AS&A_Levels"
-path_to_pdf = "/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/AS&A_levels.pdf"
-pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
-
-starting_page = 13
-ending_page = 884
-
 def make_img(pdf, target_folder, start, end):
   images = convert_from_path(pdf, first_page=start, last_page=end)
 
