@@ -1,3 +1,0 @@
-not sure why we were using this. 
-
-to see the data go to data.txt
