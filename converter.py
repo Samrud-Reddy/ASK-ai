@@ -2,8 +2,10 @@ from pdf2image import convert_from_path
 import pytesseract
 from PIL import Image
 
-target_folder = "textbooks\\chemistry\\AS&A_levels"
-pytesseract.pytesseract.tesseract_cmd = r"C:\\Users\\<Insert name here>\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
+import numpy as np
+target_folder = "textbooks/chemistry/AS&A_Levels"
+path_to_pdf = "/Users/kushalb/Documents/VSCode/ASK-ai/textbooks/chemistry/AS&A_levels/AS&A_levels.pdf"
+pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
 
 starting_page = 13
 ending_page = 884
@@ -13,7 +15,7 @@ def make_img(pdf, target_folder, start, end):
 
   for i, item in enumerate(images):
     # Save pages as images in the pdf
-    item.save(target_folder+'\\pages\\'+ str(i) +'.jpg', 'JPEG')
+    item.save(target_folder+'/pages/'+ str(i) +'.jpg', 'JPEG')
 
 def debug_string(path):
   data = pytesseract.image_to_data(Image.open(path), lang="eng", output_type=pytesseract.Output.DICT)
@@ -159,6 +161,10 @@ def append_images_vertically(image1_path, image2_path, output_path):
     # Save the result
     new_image.save(output_path, 'JPEG')
 
+# remember when joining pages to join even first odd second. 
+# this may result in the first and/or last page
+# not being able to be joined though
+
 def format_pytessaract_obj(lst, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
     result = ""
     for i, dim1 in enumerate(lst):
@@ -178,4 +184,9 @@ def format_pytessaract_obj(lst, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", 
         if i < len(lst) - 1:
             result += delimiters[0]
     return result
+
+def write_text_to_file(path, text):
+    with open(path, "a") as f:
+      f.write("\n\n\n")
+      f.write(text)
 
