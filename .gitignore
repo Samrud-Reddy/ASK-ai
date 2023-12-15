@@ -2,3 +2,5 @@ read.txt
 *.jpg
 main.py
 __pycache__
+.venv
+.gitignore
