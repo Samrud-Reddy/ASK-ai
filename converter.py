@@ -202,8 +202,11 @@ class Textbook:
         return False
 
     @staticmethod
+
     def format_pytessaract_obj(five_dimensional_list: list, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
+
         """Formats the 5 dimesional list returned by stringify_image
+
             Args:
                 five_dimensional_list: 5 dimesional list of pages[blocks[para[lines[words[]]]]]
                 delimiters: the seperators in order pages, blocks, lines, words
