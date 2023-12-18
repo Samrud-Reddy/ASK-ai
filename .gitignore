@@ -3,5 +3,4 @@ read.txt
 main.py
 __pycache__
 .venv
-.gitignore
 .DS_Store
