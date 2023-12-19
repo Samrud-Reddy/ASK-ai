@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from pdf2image.pdf2image import convert_from_path
 import pytesseract
@@ -22,14 +23,14 @@ class Textbook:
         starting_page (int): The page from where to start the image to text conversion
         ending_page (int): The page from where to end the image to text conversion
         chapters (list[chapter]): The list of all the chapters in the textbooks
-        page (int): The folder where to store the temprary image files
+        pages (str): The folder where to store the temprary image files
 
     Methods:
         __init__: Initializes a new instance of the Textbook class.
 
     """
 
-    def __init__(self, target_folder: Path, starting_page: int = 0, ending_page: int = 0, chapters: list[chapter] = [], pages: str = "pages") -> None:
+    def __init__(self, target_folder: Path, starting_page: int, ending_page: int, chapters: list[chapter] = [], pages: str = "pages") -> None:
         """Initialize a new textbook instance.
         Args:
             target_folder (str): The folder where the pdf of the same name is located
@@ -256,3 +257,18 @@ class Textbook:
         new_image.paste(image2, (0, height1))
 
         new_image.save(str(output_path), 'JPEG')
+
+
+    def append_all_images_vertically(self):
+        cur_page = self.starting_page
+
+        while cur_page + 1 <= self.ending_page:
+            self.append_images_vertically(Path(str(self.pages) + "/" + str(cur_page) + ".jpg"),
+                                          Path(str(self.pages) + "/" + str(cur_page+1) + ".jpg"),
+                                          Path(str(self.pages) + "/" + str(cur_page) + "&" + str(cur_page+1) + ".jpg"))
+
+            os.remove(Path(str(self.pages) + "/" + str(cur_page) + ".jpg"))
+            os.remove(Path(str(self.pages) + "/" + str(cur_page + 1) + ".jpg"))
+            
+
+            cur_page += 2
