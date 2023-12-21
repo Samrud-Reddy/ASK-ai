@@ -92,7 +92,7 @@ class Textbook:
         cur_par = []
         cur_line = []
 
-        data = invert_dict_list(data)
+        data = Textbook.invert_dict_list(data)
 
         for row in data:
 
@@ -145,7 +145,7 @@ class Textbook:
         #Removes empty pages
         new_out = []
         for pages in range(len(out)):
-            if not aray_has_nothing(out[pages]):
+            if not Textbook.aray_has_nothing(out[pages]):
                 new_out.append(out[pages])
 
             out = new_out
@@ -155,7 +155,7 @@ class Textbook:
         for pages in (out):
             new_pages = []
             for block in range(len(pages)):
-                if not aray_has_nothing(pages[block]):
+                if not Textbook.aray_has_nothing(pages[block]):
                     new_pages.append(pages[block])
                 new_out.append(new_pages)
             out = new_out
@@ -260,6 +260,8 @@ class Textbook:
 
 
     def append_all_images_vertically(self):
+        """Stitches all alternate images vertically
+        """
         cur_page = self.starting_page
 
         while cur_page + 1 <= self.ending_page:
