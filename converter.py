@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 from pdf2image.pdf2image import convert_from_path
@@ -5,7 +6,17 @@ import pytesseract
 from PIL import Image
 
 
-class chapter:
+class Chapter:
+    """An class representing a chapter
+        Attributes:
+            start (int): The start of the chapter 
+            end (int): The end of the chapter 
+            name (str): The name of the chapter 
+
+        Methods:
+            __init__: Initializes a new instance of the Chapter class.
+            is_in_chapter: Takes a page and returns wheter the page is in this chapter
+    """
     def __init__(self, start: int, end: int, name: str):
         self.start = start 
         self.end = end
@@ -15,6 +26,57 @@ class chapter:
         return self.start <= page or self.end > page
 
 
+class Paragraph:
+    """An class representing a paragraph
+        Attributes:
+            lines (list[str]): A list of strings each element being a line
+            textbook_name (str): The name of the text book the paragraph came from
+            page (int): The page the paragraph comes from
+            para_no (int): The paragraph number in the block
+            height (int): The height in pixels of the text
+            chapter_name (str): The name of the chapter the paragraph came from
+            text (str): The litreal text of the paragraph
+
+        Methods:
+            __init__: Initializes a new instance of the Chapter class.
+            get_text: Gets the litreal text of the paragraph
+            get_json: Gets the json of the paragraph
+
+
+    """
+    def __init__(self, lines: list[str], textbook_name: str, page: int, para_no: int, height: int, chapters: list[Chapter] = []) -> None:
+        """Initializes a paragraph
+            Args:
+                lines (list[str]): A list of strings each element being a line
+                textbook_name (str): The name of the text book the paragraph came from
+                page (int): The page the paragraph comes from
+                para_no (int): The paragraph number in the block
+                height (int): The height in pixels of the text
+                chapters (list[Chapter]): The list of chapters in the textbook
+        """
+        self.lines = lines
+        self.textbook_name = textbook_name
+        self.page = page
+        self.para_no = para_no
+        self.height = height
+        
+        self.chapter_name:str = ""
+        for i in chapters:
+            if i.is_in_chapter(self.page):
+                self.chapter_name:str = i.name
+                break
+    
+        self.text = self.get_text()
+
+    def get_text(self) -> str:
+        """Converts line to text"""
+        return "\n".join(self.lines)
+
+    def get_json(self):
+        """Gets the json of the paragraph"""
+        return json.dumps(self)
+            
+
 class Textbook:
     """A class representing textbooks
 
@@ -22,7 +84,7 @@ class Textbook:
         target_folder (str): The folder where the pdf of the same name is located
         starting_page (int): The page from where to start the image to text conversion
         ending_page (int): The page from where to end the image to text conversion
-        chapters (list[chapter]): The list of all the chapters in the textbooks
+        chapters (list[Chapter]): The list of all the chapters in the textbooks
         pages (str): The folder where to store the temprary image files
 
     Methods:
@@ -30,13 +92,13 @@ class Textbook:
 
     """
 
-    def __init__(self, target_folder: Path, starting_page: int, ending_page: int, chapters: list[chapter] = [], pages: str = "pages") -> None:
+    def __init__(self, target_folder: Path, starting_page: int, ending_page: int, chapters: list[Chapter] = [], pages: str = "pages") -> None:
         """Initialize a new textbook instance.
         Args:
             target_folder (str): The folder where the pdf of the same name is located
             starting_page (int): The page from where to start the image to text conversion
             ending_page (int): The page from where to end the image to text conversion
-            chapters (list[chapter]): The list of all the chapters in the textbooks
+            chapters (list[Chapter]): The list of all the chapters in the textbooks
             page (int): The folder where to store the temprary image files
         """
 
@@ -47,7 +109,7 @@ class Textbook:
         self.starting_page: int = starting_page
         self.ending_page: int = ending_page
 
-        self.chapters: list[chapter] = chapters
+        self.chapters: list[Chapter] = chapters
         
 
         self.pdf_path: Path = Path(str(target_folder) + "/" + str(target_folder).split("/")[-1] + ".pdf")
@@ -77,13 +139,14 @@ class Textbook:
             self.make_an_image(i)
         
 
-    def stringify_image(self, file_name: str, treshold: int = 70):
-        """Converts an image to a string
+    def stringify_page(self, page: int, treshold: int = 50):
+        """Converts an image to a list of blocks
         Args:
-            file_name (str): The name of the file to convert, the folder is the one set by self.pages
-            treshold (int): The allowence treshold from 0 to 100, 100 being everything and 1 being nothing
+            page (str): the page number to convert
+            treshold (int): The allowence treshold from 0 to 100, 0 being everything and 100 being nothing
         """
-        data = pytesseract.image_to_data(Image.open(str(self.pages) + "/" + file_name + ".jpg") , lang="eng", output_type=pytesseract.Output.DICT)
+        file_name = str(self.pages) + "/" + str(page) + ".jpg"
+        data = pytesseract.image_to_data(Image.open(file_name) , lang="eng", output_type=pytesseract.Output.DICT)
 
         out = []
 
@@ -93,7 +156,6 @@ class Textbook:
         cur_line = []
 
         data = Textbook.invert_dict_list(data)
-
         for row in data:
 
             #Sets all unconfidant values to None
@@ -140,25 +202,32 @@ class Textbook:
         out.append(cur_page)
 
         # removes none
-        out = [[[[[value for value in dim4 if value is not None] for dim4 in dim3] for dim3 in dim2] for dim2 in dim1] for dim1 in out]
-    
-        #Removes empty pages
-        new_out = []
-        for pages in range(len(out)):
-            if not Textbook.aray_has_nothing(out[pages]):
-                new_out.append(out[pages])
+        out = [[[[[value for value in dim4 if not (value == None or value == "" or value == " ")] for dim4 in dim3] for dim3 in dim2] for dim2 in dim1] for dim1 in out]
+        out = out[0] 
 
-            out = new_out
-      
-        #Removes empty blocks
+        #Removes empty blocks, paras, lines
         new_out = []
-        for pages in (out):
-            new_pages = []
-            for block in range(len(pages)):
-                if not Textbook.aray_has_nothing(pages[block]):
-                    new_pages.append(pages[block])
-                new_out.append(new_pages)
-            out = new_out
+        for block in out:
+            curr_block = []
+            if Textbook.aray_has_nothing(block):
+                continue
+
+            for para in block:
+                curr_para = []
+                if Textbook.aray_has_nothing(para):
+                    continue
+                
+                for line in para:
+                    if Textbook.aray_has_nothing(line):
+                        continue
+                    curr_para.append(line)
+
+                curr_block.append(curr_para)
+
+            new_out.append(curr_block)
+
+
+
 
         return new_out
 
@@ -205,8 +274,7 @@ class Textbook:
     @staticmethod
 
     def format_pytessaract_obj(five_dimensional_list: list, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
-
-        """Formats the 5 dimesional list returned by stringify_image
+        """Formats the 5 dimesional list returned by stringify_page
 
             Args:
                 five_dimensional_list: 5 dimesional list of pages[blocks[para[lines[words[]]]]]
