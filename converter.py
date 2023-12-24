@@ -12,10 +12,6 @@ class Chapter:
             start (int): The start of the chapter 
             end (int): The end of the chapter 
             name (str): The name of the chapter 
-
-        Methods:
-            __init__: Initializes a new instance of the Chapter class.
-            is_in_chapter: Takes a page and returns wheter the page is in this chapter
     """
     def __init__(self, start: int, end: int, name: str):
         self.start = start 
@@ -29,32 +25,36 @@ class Chapter:
 class Paragraph:
     """An class representing a paragraph
         Attributes:
-            lines (list[str]): A list of strings each element being a line
+            lines (list[list[str]]): A list of strings each element being a list of words which might have nones
             textbook_name (str): The name of the text book the paragraph came from
             page (int): The page the paragraph comes from
             para_no (int): The paragraph number in the block
-            height (int): The height in pixels of the text
+            height (float): The height in pixels of the text
             chapter_name (str): The name of the chapter the paragraph came from
             text (str): The litreal text of the paragraph
-
-        Methods:
-            __init__: Initializes a new instance of the Chapter class.
-            get_text: Gets the litreal text of the paragraph
-            get_json: Gets the json of the paragraph
-
-
     """
-    def __init__(self, lines: list[str], textbook_name: str, page: int, para_no: int, height: int, chapters: list[Chapter] = []) -> None:
+    def __init__(self, lines: list[list[str]], textbook_name: str, page: int, para_no: int, height: float, chapters: list[Chapter] = []) -> None:
         """Initializes a paragraph
             Args:
-                lines (list[str]): A list of strings each element being a line
+                lines (list[list[str]]): A list of strings each element being a list of words which might have nones
                 textbook_name (str): The name of the text book the paragraph came from
                 page (int): The page the paragraph comes from
                 para_no (int): The paragraph number in the block
-                height (int): The height in pixels of the text
+                height (float): The height in pixels of the text
                 chapters (list[Chapter]): The list of chapters in the textbook
         """
-        self.lines = lines
+        new_par = []
+        for line in lines:
+            new_line = []
+            for word in line:
+                if word:
+                    new_line.append(word)
+
+            if new_line:
+                new_par.append(" ".join(new_line))
+
+        self.lines = new_par
+
         self.textbook_name = textbook_name
         self.page = page
         self.para_no = para_no
@@ -75,6 +75,14 @@ class Paragraph:
     def get_json(self):
         """Gets the json of the paragraph"""
         return json.dumps(self)
+
+    def __str__(self) -> str:
+        return "\n".join(self.lines)
+
+
+    def __repr__(self) -> str:
+        """Returns the reprentasion of this class"""
+        return f"   Paragraph from {self.textbook_name}, page {self.page}, para number {self.para_no} and height {self.height}\n{self.__str__()}"
             
 
 class Textbook:
@@ -86,15 +94,12 @@ class Textbook:
         ending_page (int): The page from where to end the image to text conversion
         chapters (list[Chapter]): The list of all the chapters in the textbooks
         pages (str): The folder where to store the temprary image files
-
-    Methods:
-        __init__: Initializes a new instance of the Textbook class.
-
     """
 
-    def __init__(self, target_folder: Path, starting_page: int, ending_page: int, chapters: list[Chapter] = [], pages: str = "pages") -> None:
+    def __init__(self, name: str, target_folder: Path, starting_page: int, ending_page: int, chapters: list[Chapter] = [], pages: str = "pages") -> None:
         """Initialize a new textbook instance.
         Args:
+            name (str): The text book name
             target_folder (str): The folder where the pdf of the same name is located
             starting_page (int): The page from where to start the image to text conversion
             ending_page (int): The page from where to end the image to text conversion
@@ -105,6 +110,7 @@ class Textbook:
         if (not target_folder.is_dir()) or (not target_folder.exists()):
             raise Exception("Input is not a folder")
 
+        self.name: str = name
         self.target_folder: Path = target_folder
         self.starting_page: int = starting_page
         self.ending_page: int = ending_page
@@ -139,8 +145,8 @@ class Textbook:
             self.make_an_image(i)
         
 
-    def stringify_page(self, page: int, treshold: int = 50):
-        """Converts an image to a list of blocks
+    def make_paragraphs(self, page: int, treshold: int = 50) -> list[Paragraph]:
+        """Converts an image to a list of paragraphs
         Args:
             page (str): the page number to convert
             treshold (int): The allowence treshold from 0 to 100, 0 being everything and 100 being nothing
@@ -149,87 +155,44 @@ class Textbook:
         data = pytesseract.image_to_data(Image.open(file_name) , lang="eng", output_type=pytesseract.Output.DICT)
 
         out = []
-
-        cur_page = []
-        cur_block = []
         cur_par = []
+        cur_par_heights = []
         cur_line = []
+        
+        last_level = 5
 
         data = Textbook.invert_dict_list(data)
+
+        row = data[0]
         for row in data:
-
-            #Sets all unconfidant values to None
-            if row["conf"] < treshold:
+            if row["conf"] <= treshold:
                 row["text"] = None
+            else:
+                cur_par_heights.append(row["height"])
 
-            match row["level"]:
-                #Word
-                case 5:
-                    pass
-                #Line
-                case 4:
-                    if cur_line:
-                        cur_par.append(cur_line)
-                        cur_line = []
+            if row["level"] < last_level:
+                if not Textbook.aray_has_nothing(cur_line):
+                    cur_par.append(cur_line)
 
-          
-                #Paragraph
-                case 3:
-                    if cur_par:
-                        cur_block.append(cur_par)
-                        cur_par = []
+                if row["level"] < 4:
+                    if not Textbook.aray_has_nothing(cur_par):
+                        avg = sum(cur_par_heights) / (len(cur_par_heights) if cur_par_heights else 1)
+                        out.append(Paragraph(cur_par, self.name, page, row["par_num"], avg))
 
+                    cur_par_heights = []
+                    cur_par = []
+                cur_line = []
 
-                #Block
-                case 2:
-                    if cur_block:
-                        cur_page.append(cur_block)
-                        cur_block = []
-
-
-                #Page
-                case 1:
-                    if cur_page:
-                        out.append(cur_page)
-                        cur_page = []
-
-
+            last_level = row["level"]
             cur_line.append(row["text"])
-        
+
+
+        avg_height = sum(cur_par_heights) / len(cur_par_heights)
         cur_par.append(cur_line)
-        cur_block.append(cur_par)
-        cur_page.append(cur_block)
-        out.append(cur_page)
-
-        # removes none
-        out = [[[[[value for value in dim4 if not (value == None or value == "" or value == " ")] for dim4 in dim3] for dim3 in dim2] for dim2 in dim1] for dim1 in out]
-        out = out[0] 
-
-        #Removes empty blocks, paras, lines
-        new_out = []
-        for block in out:
-            curr_block = []
-            if Textbook.aray_has_nothing(block):
-                continue
-
-            for para in block:
-                curr_para = []
-                if Textbook.aray_has_nothing(para):
-                    continue
-                
-                for line in para:
-                    if Textbook.aray_has_nothing(line):
-                        continue
-                    curr_para.append(line)
-
-                curr_block.append(curr_para)
-
-            new_out.append(curr_block)
+        out.append(Paragraph(cur_par, self.name, page, row["par_num"], avg_height))
 
 
-
-
-        return new_out
+        return out
 
 
     @staticmethod
@@ -270,34 +233,6 @@ class Textbook:
         if flattened == []:
             return True
         return False
-
-    @staticmethod
-
-    def format_pytessaract_obj(five_dimensional_list: list, delimiters = ["\n\n----\n\n", "\n\n\n", "\n\n", "\n", " "]):
-        """Formats the 5 dimesional list returned by stringify_page
-
-            Args:
-                five_dimensional_list: 5 dimesional list of pages[blocks[para[lines[words[]]]]]
-                delimiters: the seperators in order pages, blocks, lines, words
-        """
-        result = ""
-        for i, dim1 in enumerate(five_dimensional_list):
-            for j, dim2 in enumerate(dim1):
-                for k, dim3 in enumerate(dim2):
-                    for l, dim4 in enumerate(dim3):
-                        for m, word in enumerate(dim4):
-                            result += word
-                            if m < len(dim4) - 1:
-                                result += delimiters[4]
-                        if l < len(dim3) - 1:
-                            result += delimiters[3]
-                    if k < len(dim2) - 1:
-                        result += delimiters[2]
-                if j < len(dim1) - 1:
-                    result += delimiters[1]
-            if i < len(five_dimensional_list) - 1:
-                result += delimiters[0]
-        return result
 
 
     @staticmethod
