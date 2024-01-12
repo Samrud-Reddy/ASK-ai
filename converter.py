@@ -69,7 +69,7 @@ class Paragraph:
         self.text = self.get_text()
 
     def get_text(self) -> str:
-        """Converts line to text"""
+        """Converts lines to text"""
         return "\n".join(self.lines)
 
     def get_json(self):
