@@ -1,7 +1,6 @@
 import converter
 import google.generativeai as genai
 import pinecone
-import multiprocessing
 
 
 class Vector_database:
@@ -76,8 +75,7 @@ class Vector_database:
             for i in range(0, len(array), chunk_size):  
                 yield array[i:i + chunk_size] 
         
-        with multiprocessing.Pool(20) as p:
-            vectors = p.map(self.create_vector, paras)
+        vectors = map(self.create_vector, paras)
 
 
         for chunk in divide_chunks(vectors, 100):
