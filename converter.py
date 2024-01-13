@@ -27,13 +27,14 @@ class Paragraph:
         Attributes:
             lines (list[list[str]]): A list of strings each element being a list of words which might have nones
             textbook_name (str): The name of the text book the paragraph came from
+            subject_name (str): The name of the subject
             page (int): The page the paragraph comes from
             para_no (int): The paragraph number in the block
             height (float): The height in pixels of the text
             chapter_name (str): The name of the chapter the paragraph came from
             text (str): The litreal text of the paragraph
     """
-    def __init__(self, lines: list[list[str]], textbook_name: str, page: int, para_no: int, height: float, chapters: list[Chapter] = []) -> None:
+    def __init__(self, lines: list[list[str]], textbook_name: str, subject_name:str, page: int, para_no: int, height: float, chapter: str|None = None) -> None:
         """Initializes a paragraph
             Args:
                 lines (list[list[str]]): A list of strings each element being a list of words which might have nones
@@ -41,7 +42,7 @@ class Paragraph:
                 page (int): The page the paragraph comes from
                 para_no (int): The paragraph number in the block
                 height (float): The height in pixels of the text
-                chapters (list[Chapter]): The list of chapters in the textbook
+                chapter (str): The chapter from where the paragraph came from
         """
         new_par = []
         for line in lines:
@@ -60,11 +61,8 @@ class Paragraph:
         self.para_no = para_no
         self.height = height
         
-        self.chapter_name:str = ""
-        for i in chapters:
-            if i.is_in_chapter(self.page):
-                self.chapter_name:str = i.name
-                break
+        self.subject_name = subject_name
+        self.chapter_name:str|None = chapter
     
         self.text = self.get_text()
 
@@ -89,6 +87,8 @@ class Textbook:
     """A class representing textbooks
 
     Attributes:
+        name (str): The textbook name
+        subject_name (str): The subject name of the textbook
         target_folder (str): The folder where the pdf of the same name is located
         starting_page (int): The page from where to start the image to text conversion
         ending_page (int): The page from where to end the image to text conversion
@@ -96,10 +96,11 @@ class Textbook:
         pages (str): The folder where to store the temprary image files
     """
 
-    def __init__(self, name: str, target_folder: Path, starting_page: int, ending_page: int, chapters: list[Chapter] = [], pages: str = "pages") -> None:
+    def __init__(self, name: str, subject_name:str, target_folder: Path, starting_page: int, ending_page: int, chapters: list[Chapter] = [], pages: str = "pages") -> None:
         """Initialize a new textbook instance.
         Args:
             name (str): The text book name
+            subject_name (str): The subject name of the textbook
             target_folder (str): The folder where the pdf of the same name is located
             starting_page (int): The page from where to start the image to text conversion
             ending_page (int): The page from where to end the image to text conversion
@@ -112,6 +113,8 @@ class Textbook:
 
         self.name: str = name
         self.target_folder: Path = target_folder
+        self.subject_name: str = subject_name
+
         self.starting_page: int = starting_page
         self.ending_page: int = ending_page
 
@@ -177,7 +180,7 @@ class Textbook:
                 if row["level"] < 4:
                     if not Textbook.aray_has_nothing(cur_par):
                         avg = sum(cur_par_heights) / (len(cur_par_heights) if cur_par_heights else 1)
-                        out.append(Paragraph(cur_par, self.name, page, row["par_num"], avg))
+                        out.append(Paragraph(cur_par, self.name, self.subject_name, page, row["par_num"], avg))
 
                     cur_par_heights = []
                     cur_par = []
@@ -189,11 +192,10 @@ class Textbook:
 
         avg_height = sum(cur_par_heights) / len(cur_par_heights)
         cur_par.append(cur_line)
-        out.append(Paragraph(cur_par, self.name, page, row["par_num"], avg_height))
+        out.append(Paragraph(cur_par, self.name, self.subject_name, page, row["par_num"], avg_height))
 
 
         return out
-
 
     @staticmethod
     def invert_dict_list(data):
