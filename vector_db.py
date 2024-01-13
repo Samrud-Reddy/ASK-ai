@@ -1,5 +1,5 @@
 from multiprocessing import Pool
-import converter
+from converter import Paragraph
 import pinecone
 import time
 import google.generativeai as genai
@@ -52,7 +52,7 @@ class Vector_database:
             title=title,
         )["embedding"]
 
-    def create_vector(self, para: converter.Paragraph):
+    def create_vector(self, para: Paragraph):
         """Creates vectors that can be passed into upsert
             Attributes:
                 para (converter.Paragraph): A Paragraph object from converter
@@ -63,14 +63,17 @@ class Vector_database:
         print("sending "+id)
         embeds = self.get_embedings_for_indexing(para.text, para.textbook_name)
         metadata = {
-                "text": para.text,
-                "textbook_name": para.textbook_name,
-                "chapter_name": para.chapter_name,
-                "page_no": para.page,
+                "lines":para.lines,
+                "textbook_name":para.textbook_name,
+                "subject_name":para.subject_name,
+                "page":para.page,
+                "para_no":para.para_no,
+                "height":para.height,
+                "chapter":para.chapter_name
                 }
         return (id, embeds, metadata)
 
-    def add_paragraphs(self, paras: list[converter.Paragraph]) -> None:
+    def add_paragraphs(self, paras: list[Paragraph]) -> None:
         """Adds paragraphs to the vector database
             Attributes:
                 paras (converter.Paragraph): A paragraph object from converter
@@ -90,3 +93,26 @@ class Vector_database:
         for chunk in divide_chunks(vectors, 80):
             self.index.upsert(vectors=chunk, namespace = namespace)
             time.sleep(1000)
+
+        
+    def index_return_to_Paragraph(self, item) -> Paragraph:
+        """Converts the item returned by index to a Paragraph
+            Attributes:
+                item (NA): The item returned by the vectorsearch
+        """
+        return Paragraph(item.metadata.lines, item.metadata.textbook_name, item.metadata.page, item.metadata.para_no, item.metadata.height, item.metadata.chapter)
+    
+
+    def find_relevent_paras(self, query: str, subject_name: str|None = None, no_results: int = 3) -> list[Paragraph]:
+        query_vector = self.get_embedings_for_retrival_query(query)
+
+        if subject_name:
+            results = self.index.query(vector=query_vector, top_k=no_results, include_metadata=True, namespace=subject_name)
+        else:
+            results = self.index.query(vector=query_vector, top_k=no_results, include_metadata=True)
+
+        results = results["matches"]
+        results = list(map(self.index_return_to_Paragraph, results))
+
+        return results
+
