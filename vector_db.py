@@ -89,7 +89,7 @@ class Vector_database:
 
         for chunk in divide_chunks(vectors, 80):
             self.index.upsert(vectors=chunk, namespace = namespace)
-            # time.sleep(1000)
+            time.sleep(1)
 
         
     def index_return_to_Paragraph(self, item) -> Paragraph:
