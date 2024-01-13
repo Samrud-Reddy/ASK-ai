@@ -166,6 +166,11 @@ class Textbook:
 
         data = Textbook.invert_dict_list(data)
 
+        chapter_name = ""
+        for chapter in self.chapters:
+            if chapter.is_in_chapter(page):
+                chapter_name = chapter.name
+
         row = data[0]
         for row in data:
             if row["conf"] <= treshold:
@@ -180,7 +185,7 @@ class Textbook:
                 if row["level"] < 4:
                     if not Textbook.aray_has_nothing(cur_par):
                         avg = sum(cur_par_heights) / (len(cur_par_heights) if cur_par_heights else 1)
-                        out.append(Paragraph(cur_par, self.name, self.subject_name, page, row["par_num"], avg))
+                        out.append(Paragraph(cur_par, self.name, self.subject_name, page, row["par_num"], avg, chapter = chapter_name))
 
                     cur_par_heights = []
                     cur_par = []
@@ -192,7 +197,7 @@ class Textbook:
 
         avg_height = sum(cur_par_heights) / len(cur_par_heights)
         cur_par.append(cur_line)
-        out.append(Paragraph(cur_par, self.name, self.subject_name, page, row["par_num"], avg_height))
+        out.append(Paragraph(cur_par, self.name, self.subject_name, page, row["par_num"], avg_height, chapter = chapter_name))
 
 
         return out
