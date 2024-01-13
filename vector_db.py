@@ -1,6 +1,8 @@
+from multiprocessing import Pool
 import converter
-import google.generativeai as genai
 import pinecone
+import time
+import google.generativeai as genai
 
 
 class Vector_database:
@@ -16,10 +18,11 @@ class Vector_database:
         self.PINECONE_API_KEY = PINECONE_API_KEY
         self.environment = environment
 
-        self.index = pinecone.Index("textbooks")
 
         genai.configure(api_key=GEMINI_API_KEY)
         pinecone.init(api_key=PINECONE_API_KEY, environment="gcp-starter")
+
+        self.index = pinecone.Index("textbooks")
 
     def get_embedings_for_retrival_query(self, text: str) -> list[float]:
         """Gets vector embedings for a retrieval_query
@@ -68,6 +71,11 @@ class Vector_database:
         return (id, embeds, metadata)
 
     def add_paragraphs(self, paras: list[converter.Paragraph]) -> None:
+        """Adds paragraphs to the vector database
+            Attributes:
+                paras (converter.Paragraph): A paragraph object from converter
+        """
+
         namespace = paras[0].textbook_name
 
         def divide_chunks(array, chunk_size): 
@@ -75,9 +83,10 @@ class Vector_database:
             for i in range(0, len(array), chunk_size):  
                 yield array[i:i + chunk_size] 
         
-        vectors = map(self.create_vector, paras)
+        with Pool(10) as p:
+            vectors = p.map(self.create_vector, paras)
 
 
-        for chunk in divide_chunks(vectors, 100):
+        for chunk in divide_chunks(vectors, 80):
             self.index.upsert(vectors=chunk, namespace = namespace)
-        
+            time.sleep(1000)
