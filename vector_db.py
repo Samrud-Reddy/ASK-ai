@@ -60,7 +60,6 @@ class Vector_database:
             RETURN a tuple with (id(str), embeding(list[floats]), metadata[dict])
         """
         id = str(para.textbook_name)+"&"+str(para.page)+"&"+str(para.chapter_name)+"&"+str(para.para_no)+"&"+str(para.height)
-        print("sending "+id)
         embeds = self.get_embedings_for_indexing(para.text, para.textbook_name)
         metadata = {
                 "lines":para.lines,
@@ -69,7 +68,7 @@ class Vector_database:
                 "page":para.page,
                 "para_no":para.para_no,
                 "height":para.height,
-                "chapter":para.chapter_name
+                "chapter":str(para.chapter_name)
                 }
         return (id, embeds, metadata)
 
@@ -79,20 +78,18 @@ class Vector_database:
                 paras (converter.Paragraph): A paragraph object from converter
         """
 
-        namespace = paras[0].textbook_name
+        namespace = paras[0].subject_name
 
         def divide_chunks(array, chunk_size): 
             # looping till length l 
             for i in range(0, len(array), chunk_size):  
                 yield array[i:i + chunk_size] 
         
-        with Pool(10) as p:
-            vectors = p.map(self.create_vector, paras)
-
+        vectors = list(map(self.create_vector, paras))
 
         for chunk in divide_chunks(vectors, 80):
             self.index.upsert(vectors=chunk, namespace = namespace)
-            time.sleep(1000)
+            # time.sleep(1000)
 
         
     def index_return_to_Paragraph(self, item) -> Paragraph:
@@ -100,7 +97,8 @@ class Vector_database:
             Attributes:
                 item (NA): The item returned by the vectorsearch
         """
-        return Paragraph(item.metadata.lines, item.metadata.textbook_name, item.metadata.page, item.metadata.para_no, item.metadata.height, item.metadata.chapter)
+        lines = [line.split(" ") for line in item["metadata"]["lines"]]
+        return Paragraph(lines, item["metadata"]["textbook_name"], item["metadata"]["page"], item["metadata"]["para_no"], item["metadata"]["height"], item["metadata"]["chapter"])
     
 
     def find_relevent_paras(self, query: str, subject_name: str|None = None, no_results: int = 3) -> list[Paragraph]:
