@@ -9,17 +9,17 @@ from PIL import Image
 class Chapter:
     """An class representing a chapter
         Attributes:
+            name (str): The name of the chapter 
             start (int): The start of the chapter 
             end (int): The end of the chapter 
-            name (str): The name of the chapter 
     """
-    def __init__(self, start: int, end: int, name: str):
+    def __init__(self, name: str, start: int, end: int):
         self.start = start 
         self.end = end
         self.name = name
 
     def is_in_chapter(self, page: int) -> bool:
-        return self.start <= page or self.end > page
+        return self.start <= page or self.end >= page
 
 
 class Paragraph:
@@ -195,12 +195,23 @@ class Textbook:
             cur_line.append(row["text"])
 
 
-        avg_height = sum(cur_par_heights) / len(cur_par_heights)
+        avg_height = sum(cur_par_heights) / (len(cur_par_heights) if cur_par_heights else 1)
         cur_par.append(cur_line)
         out.append(Paragraph(cur_par, self.name, self.subject_name, page, row["par_num"], avg_height, chapter = chapter_name))
 
 
         return out
+
+
+    def make_all_images_into_paragraphs(self, treshold: int = 50):
+        pages = []
+        for i in range(self.starting_page, self.ending_page + 1):
+            x = self.make_paragraphs(i, treshold=treshold)
+            for j in x:
+                pages.append(j)
+
+        return pages
+
 
     @staticmethod
     def invert_dict_list(data):
