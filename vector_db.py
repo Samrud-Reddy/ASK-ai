@@ -1,4 +1,4 @@
-from multiprocessing import Pool
+from pandas._libs.lib import NoDefault
 from converter import Paragraph
 import pinecone
 import time
@@ -45,6 +45,8 @@ class Vector_database:
 
             RETURNS a 768 dimensional array of floats
         """
+        if not (text):
+            text = "None"
         return genai.embed_content(
             model="models/embedding-001",
             content=text,
@@ -87,12 +89,15 @@ class Vector_database:
         
         vectors = list(map(self.create_vector, paras))
 
+        x=0
         for chunk in divide_chunks(vectors, 80):
+            print(f"Sending chunk {x}")
             self.index.upsert(vectors=chunk, namespace = namespace)
             time.sleep(1)
+            x += 80
 
         
-    def index_return_to_Paragraph(self, item) -> Paragraph:
+    def index_return_to_paragraph(self, item) -> Paragraph:
         """Converts the item returned by index to a Paragraph
             Attributes:
                 item (NA): The item returned by the vectorsearch
@@ -110,7 +115,7 @@ class Vector_database:
             results = self.index.query(vector=query_vector, top_k=no_results, include_metadata=True)
 
         results = results["matches"]
-        results = list(map(self.index_return_to_Paragraph, results))
+        results = list(map(self.index_return_to_paragraph, results))
 
         return results
 
