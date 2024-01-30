@@ -9,13 +9,14 @@ class Gemini:
             safety settings (dict): The safety settings to obey
             temp (float): The temperature of the model
     """
-    def __init__(self, GEMINI_API_KEY:str, model_name:str, safety_setting:dict=None, temp:float=1.0):
+    def __init__(self, GEMINI_API_KEY:str, model_name:str="models/gemini-pro", safety_setting=None, temp:float=1.0):
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(model_name=model_name, safety_settings=safety_setting, 
         generation_config=genai.types.GenerationConfig(
             temperature=temp
         ))
         self.model = model
+        self.start_chat()
 
     def start_chat(self):
         chat = self.model.start_chat(history=[])
