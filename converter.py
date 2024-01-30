@@ -19,7 +19,7 @@ class Chapter:
         self.name = name
 
     def is_in_chapter(self, page: int) -> bool:
-        return self.start <= page or self.end >= page
+        return self.start <= page and self.end >= page
 
 
 class Paragraph:
