@@ -13,7 +13,7 @@ class Vector_database:
             environment (str): The environment name for pinecone
             index (idk): The pinecone Index
     """
-    def __init__(self, GEMINI_API_KEY, PINECONE_API_KEY, environment = "gcp-starter"):
+    def __init__(self, GEMINI_API_KEY, PINECONE_API_KEY, environment = "gcp-starter", index = "textbooks"):
         self.GEMINI_API_KEY = GEMINI_API_KEY
         self.PINECONE_API_KEY = PINECONE_API_KEY
         self.environment = environment
@@ -63,6 +63,7 @@ class Vector_database:
         """
         id = str(para.textbook_name)+"&"+str(para.page)+"&"+str(para.chapter_name)+"&"+str(para.para_no)+"&"+str(para.height)
         embeds = self.get_embedings_for_indexing(para.text, para.textbook_name)
+        print(f"doing page {str(id)}")
         metadata = {
                 "lines":para.lines,
                 "textbook_name":para.textbook_name,
@@ -103,7 +104,7 @@ class Vector_database:
                 item (NA): The item returned by the vectorsearch
         """
         lines = [line.split(" ") for line in item["metadata"]["lines"]]
-        return Paragraph(lines, item["metadata"]["textbook_name"], item["metadata"]["page"], item["metadata"]["para_no"], item["metadata"]["height"], item["metadata"]["chapter"])
+        return Paragraph(lines, item["metadata"]["textbook_name"], item["metadata"]["subject_name"], item["metadata"]["page"], item["metadata"]["para_no"], item["metadata"]["height"], item["metadata"]["chapter"])
     
 
     def find_relevent_paras(self, query: str, subject_name: str|None = None, no_results: int = 3) -> list[Paragraph]:
