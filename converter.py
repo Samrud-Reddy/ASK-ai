@@ -205,10 +205,12 @@ class Textbook:
 
     def make_all_images_into_paragraphs(self, treshold: int = 50):
         pages = []
-        for i in range(self.starting_page, self.ending_page + 1):
-            x = self.make_paragraphs(i, treshold=treshold)
-            for j in x:
-                pages.append(j)
+        for chapter in self.chapters:
+            for i in range(chapter.start, chapter.end+1):
+                print("Doing page "+str(i))
+                x = self.make_paragraphs(i, treshold=treshold)
+                for j in x:
+                    pages.append(j)
 
         return pages
 
