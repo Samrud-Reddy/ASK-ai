@@ -1,3 +1,3 @@
-export const handleSubmit = () => {
-    console.log("test");
+export const handleSubmit = (question: string) => {
+    console.log(question);
 };
