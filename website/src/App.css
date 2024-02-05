@@ -1,0 +1,44 @@
+body,
+html {
+    margin: 0;
+}
+
+#root {
+    text-align: center;
+}
+
+.wrapperDiv {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+.inputStuff {
+    width: 90vw;
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 15vh;
+}
+
+.askInput {
+    height: fit-content;
+    width: 75%;
+    padding-left: 2px;
+}
+
+.subjectSelect {
+    width: 25%;
+    padding-right: 2px;
+}
+
+.title {
+    height: fit-content;
+}
+
+.mantine-Input-section {
+    cursor: pointer;
+}
