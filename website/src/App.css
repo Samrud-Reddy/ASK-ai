@@ -5,17 +5,20 @@ html {
 
 #root {
     text-align: center;
+    height: 100vh;
+    width: 100vw;
 }
 
 .wrapperDiv {
     width: 100vw;
     height: 100vh;
     display: flex;
-    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 .inputStuff {
-    width: 90vw;
+    width: 95vw;
     position: absolute;
     bottom: 0;
     display: flex;
@@ -37,6 +40,7 @@ html {
 
 .title {
     height: fit-content;
+    margin-top: 1rem;
 }
 
 .sendIcon {
@@ -45,4 +49,10 @@ html {
 
 .iconDiv {
     display: flex;
+}
+
+.chatBox {
+    width: 95vw;
+    height: 80vh;
+    text-align: left;
 }
