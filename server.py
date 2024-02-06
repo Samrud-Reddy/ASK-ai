@@ -30,10 +30,12 @@ def hello():
     subject = payload["subject"]
     question = payload["query"]
 
-    paras = db.find_relevent_paras(question, subject, 5)
-    
+    if subject == "Chemistry": 
+        paras = db.find_relevent_paras(question, "chem", 5)
     ans = model.query(question, paras)
-    print(ans)
+
+    print(paras)
+    print("Response is " + ans)
 
     return ans
 
