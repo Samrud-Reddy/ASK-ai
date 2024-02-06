@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import { NativeSelect, TextInput } from "@mantine/core";
+import { NativeSelect, Textarea } from "@mantine/core";
 import { IconSend2 } from "@tabler/icons-react";
 import { handleSubmit } from "./handleSubmit";
 import { useHover } from "@mantine/hooks";
@@ -9,8 +9,20 @@ const App = () => {
     const [question, setQuestion] = useState<string>("");
     const [subject, setSubject] = useState<string>("Chemistry"); // setting chemistry as default cuz it's the hardest
     const [prevChatArray, setPrevChatArray] = useState<string[]>([]);
+    const [canSend, setCanSend] = useState<boolean>(true);
     const subjectList: string[] = ["Chemistry", "Physics", "Biology", "Comp Sci"];
     const { hovered, ref } = useHover();
+
+    const handleSubmission = async () => {
+        const questionAsked = question.trim();
+        setQuestion("");
+        setPrevChatArray((prevChatArray) => [...prevChatArray, questionAsked]);
+        setCanSend(false);
+        const response = await handleSubmit(questionAsked, subject, prevChatArray);
+        console.log("RESPONSE IS " + response);
+        setPrevChatArray((prevChatArray) => [...prevChatArray, response]);
+        setCanSend(true);
+    };
 
     return (
         <div className="wrapperDiv">
@@ -34,7 +46,7 @@ const App = () => {
                         setSubject(e.currentTarget.value);
                     }}
                 />
-                <TextInput
+                <Textarea
                     className="askInput"
                     placeholder="Ask AI Anything..."
                     rightSection={
@@ -42,13 +54,10 @@ const App = () => {
                             <IconSend2
                                 stroke={hovered ? 2 : 1}
                                 className="sendIcon"
-                                onClick={async () => {
-                                    const questionAsked = question;
-                                    setQuestion("");
-                                    setPrevChatArray((prevChatArray) => [...prevChatArray, questionAsked]);
-                                    const response = await handleSubmit(questionAsked, subject, prevChatArray);
-                                    console.log("RESPONSE IS " + response);
-                                    setPrevChatArray((prevChatArray) => [...prevChatArray, response]);
+                                onClick={() => {
+                                    if (question != "" && canSend) {
+                                        handleSubmission();
+                                    }
                                 }}
                             />
                         </div>
@@ -60,13 +69,8 @@ const App = () => {
                         setQuestion(e.currentTarget.value);
                     }}
                     onKeyUp={async (e) => {
-                        if (e.key == "Enter") {
-                            const questionAsked = question;
-                            setQuestion("");
-                            setPrevChatArray((prevChatArray) => [...prevChatArray, questionAsked]);
-                            const response = await handleSubmit(questionAsked, subject, prevChatArray);
-                            console.log("RESPONSE IS " + response);
-                            setPrevChatArray((prevChatArray) => [...prevChatArray, response]);
+                        if (e.key == "Enter" && question.trim() != "" && canSend && !e.shiftKey) {
+                            handleSubmission();
                         }
                     }}
                 />
