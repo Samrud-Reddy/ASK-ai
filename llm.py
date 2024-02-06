@@ -1,6 +1,6 @@
 import google.generativeai as genai
 
-class Gemini:
+class Llm:
     """
         A class creating a new Gemini model.
         Attributes:
@@ -31,18 +31,20 @@ class Gemini:
         history = self.chat.history
         return history
 
-def generate_prompt(question, relevant_paras):
-    prompt = """Answer the question below with the data provided that you find relevant:
-{question}
-This is the data (in order of relevance):
-para 1: {para_1}
-para 2: {para_2}
-para 3: {para_3}
-para 4: {para_4}
-para 5: {para_5}
+    def query(self, question, paras) -> str:
+        prompt = self.generate_prompt(question, paras)
+        return str(self.send_chat_message(prompt).text)
 
-Keep your answer a bit short where you can. Stay relevant to the question. 
-""".format(question=question, para_1=relevant_paras[0], para_2=relevant_paras[1], para_3=relevant_paras[2], 
-para_4=relevant_paras[3], para_5=relevant_paras[4])
+    @staticmethod
+    def generate_prompt(question, relevant_paras):
+        prompt = f"""Answer the question below with the data provided that you find relevant:
+    {question}
+    This is the data (in order of relevance):
+    """ 
+            
+        for (i, paras) in enumerate(relevant_paras):
+            prompt += f"para {i}: {paras}"
 
-    return prompt
+        prompt += "Keep your answer a bit short where you can. Stay relevant to the question."
+
+        return prompt
