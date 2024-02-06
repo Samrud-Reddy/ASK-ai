@@ -18,7 +18,7 @@ const App = () => {
         setQuestion("");
         setPrevChatArray((prevChatArray) => [...prevChatArray, questionAsked]);
         setCanSend(false);
-        const response = await handleSubmit(questionAsked, subject, prevChatArray);
+        const response = await handleSubmit(questionAsked, subject);
         console.log("RESPONSE IS " + response);
         setPrevChatArray((prevChatArray) => [...prevChatArray, response]);
         setCanSend(true);
