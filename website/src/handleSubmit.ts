@@ -1,17 +1,20 @@
 export const handleSubmit = async (question: string, subject: string) => {
-    const url = "";
-    const res = await fetch(url, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            subject: subject,
-            query: question,
-        }),
-    });
+    try {
+        const url = "http://127.0.0.1:5000/query";
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                subject: subject,
+                query: question,
+            }),
+        });
+        const text = await res.text();
 
-    // this should be of type {subject: "something", query: "something"}
-    const json = await res.json();
-    return json;
+        return text;
+    } catch (e) {
+        return new Error("Server Error");
+    }
 };
