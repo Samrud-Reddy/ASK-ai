@@ -1,4 +1,3 @@
-from pandas._libs.lib import NoDefault
 from converter import Paragraph
 import pinecone
 import time
