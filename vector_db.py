@@ -1,8 +1,7 @@
 from converter import Paragraph
-import pinecone
+from pinecone import Pinecone
 import time
 import google.generativeai as genai
-
 
 class Vector_database:
     """An class representing a Vector_database 
@@ -19,9 +18,9 @@ class Vector_database:
 
 
         genai.configure(api_key=GEMINI_API_KEY)
-        pinecone.init(api_key=PINECONE_API_KEY, environment="gcp-starter")
+        pinecone = Pinecone(api_key=PINECONE_API_KEY)
 
-        self.index = pinecone.Index("textbooks")
+        self.index = pinecone.Index(name="textbooks")
 
     def get_embedings_for_retrival_query(self, text: str) -> list[float]:
         """Gets vector embedings for a retrieval_query
