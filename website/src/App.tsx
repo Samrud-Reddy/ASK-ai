@@ -19,7 +19,12 @@ const App = () => {
         setPrevChatArray((prevChatArray) => [...prevChatArray, questionAsked]);
         setCanSend(false);
         const response = await handleSubmit(questionAsked, subject);
-        setPrevChatArray((prevChatArray) => [...prevChatArray, response]);
+        if (response instanceof Error){
+            setPrevChatArray((prevChatArray) => [...prevChatArray, "Oops an error has occured"]);
+        } else {
+            setPrevChatArray((prevChatArray) => [...prevChatArray, response]);
+        }
+        
         setCanSend(true);
     };
 

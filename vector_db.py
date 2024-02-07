@@ -18,9 +18,9 @@ class Vector_database:
 
 
         genai.configure(api_key=GEMINI_API_KEY)
-        pinecone = Pinecone(api_key=PINECONE_API_KEY)
+        pine = Pinecone(api_key=PINECONE_API_KEY)
 
-        self.index = pinecone.Index(name="textbooks")
+        self.index = pine.Index(name=index)
 
     def get_embedings_for_retrival_query(self, text: str) -> list[float]:
         """Gets vector embedings for a retrieval_query
