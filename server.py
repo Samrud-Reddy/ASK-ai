@@ -21,23 +21,31 @@ model = llm.Llm(gemini, temp=0.8)
 
 @app.route('/query', methods=["POST"])
 @cross_origin()
-def hello():
+def query():
     if not request.is_json:
-        return "Fail", 400
+        return "Failed cause value is not JSON", 400
 
     # Access the JSON payload
     payload = request.json or {}
     subject = payload["subject"]
     question = payload["query"]
 
-    if subject == "Chemistry": 
-        paras = db.find_relevent_paras(question, "chem", 5)
-    ans = model.query(question, paras)
+    if subject is None or question is None:
+        return "Failed cause subject or question is None", 400
 
-    print(paras)
-    print("Response is " + ans)
+    subject_translate = {"Chemistry": "chem"}
 
-    return ans
+
+    if subject in subject_translate:
+        paras = db.find_relevent_paras(question, subject_translate[subject], 5)
+        ans = model.query(question, paras)
+
+        print(paras)
+        print("Response is " + ans)
+
+        return ans
+    else:
+        return "FAILED cause subject is wrong", 400
 
 
     
