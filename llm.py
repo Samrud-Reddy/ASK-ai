@@ -37,7 +37,7 @@ class Llm:
 
     @staticmethod
     def generate_prompt(question, relevant_paras):
-        prompt = f"""Answer the question below with the data provided that you find relevant:
+        prompt = f"""Answer the question
     {question}
     This is the data (in order of relevance):
     """ 
