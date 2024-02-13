@@ -9,17 +9,17 @@ class Llm:
             safety settings (dict): The safety settings to obey
             temp (float): The temperature of the model
     """
-    def __init__(self, GEMINI_API_KEY:str, model_name:str="models/gemini-pro", safety_setting=None, temp:float=1.0):
+    def __init__(self, GEMINI_API_KEY:str, model_name:str="models/gemini-pro", safety_setting=None, temp:float=1.0, history=[]):
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(model_name=model_name, safety_settings=safety_setting, 
         generation_config=genai.types.GenerationConfig(
             temperature=temp
         ))
         self.model = model
-        self.start_chat()
+        self.start_chat(hist=history)
 
-    def start_chat(self):
-        chat = self.model.start_chat(history=[])
+    def start_chat(self, hist):
+        chat = self.model.start_chat(history=hist)
         self.chat = chat
         return chat
     
@@ -37,7 +37,11 @@ class Llm:
 
     @staticmethod
     def generate_prompt(question, relevant_paras):
-        prompt = f"""Answer the question
+        prompt = f"""Answer the question below using the data provided and your own knowledge if the data is insufficient.
+        Also, the user may ask a question using their chat history, such as "But why is this?" when their previous question
+        asked for the reactions between acid and base, for example. In this case, when you feel it is suitable, ignore the
+        data provided, as it may not be too relevant (given the data doesn't know the previous context of the chat), and reply
+        normally.
     {question}
     This is the data (in order of relevance):
     """ 

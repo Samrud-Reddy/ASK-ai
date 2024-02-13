@@ -10,21 +10,24 @@ const App = () => {
     const [subject, setSubject] = useState<string>("Chemistry"); // setting chemistry as default cuz it's the hardest
     const [prevChatArray, setPrevChatArray] = useState<string[]>([]);
     const [canSend, setCanSend] = useState<boolean>(true);
+    const [history, setHistory] = useState<string[]>([]);
     const subjectList: string[] = ["Chemistry", "Physics", "Biology", "Comp Sci"];
     const { hovered, ref } = useHover();
 
     const handleSubmission = async () => {
         const questionAsked = question.trim();
+        const historyToPassIn = [...history];
+        console.log(historyToPassIn);
         setQuestion("");
         setPrevChatArray((prevChatArray) => [...prevChatArray, questionAsked]);
         setCanSend(false);
-        const response = await handleSubmit(questionAsked, subject);
-        if (response instanceof Error){
+        const response = await handleSubmit(questionAsked, subject, historyToPassIn);
+        if (response instanceof Error) {
             setPrevChatArray((prevChatArray) => [...prevChatArray, "Oops an error has occured"]);
         } else {
             setPrevChatArray((prevChatArray) => [...prevChatArray, response]);
+            setHistory([...history, questionAsked, response]);
         }
-        
         setCanSend(true);
     };
 
@@ -43,7 +46,7 @@ const App = () => {
             <div className="inputStuff">
                 <NativeSelect
                     value={subject}
-                    size="lg"
+                    size="md"
                     className="subjectSelect"
                     data={subjectList}
                     onChange={(e) => {
@@ -53,6 +56,7 @@ const App = () => {
                 <Textarea
                     className="askInput"
                     placeholder="Ask AI Anything..."
+                    autosize
                     rightSection={
                         <div className="iconDiv" ref={ref}>
                             <IconSend2
@@ -67,7 +71,7 @@ const App = () => {
                         </div>
                     }
                     rightSectionPointerEvents="all"
-                    size="lg"
+                    size="md"
                     value={question}
                     onChange={(e) => {
                         setQuestion(e.currentTarget.value);
