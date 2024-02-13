@@ -114,6 +114,7 @@ class Vector_database:
             results = self.index.query(vector=query_vector, top_k=no_results, include_metadata=True)
 
         results = results["matches"]
+        results = [result for result in results if result["score"] < 0.6]
         results = list(map(self.index_return_to_paragraph, results))
 
         return results

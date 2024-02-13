@@ -16,6 +16,7 @@ class Llm:
             temperature=temp
         ))
         self.model = model
+        print(history)
         self.start_chat(hist=history)
 
     def start_chat(self, hist):
@@ -31,24 +32,29 @@ class Llm:
         history = self.chat.history
         return history
 
-    def query(self, question, paras) -> str:
-        prompt = self.generate_prompt(question, paras)
+    def query(self, question, paras, history) -> str:
+        prompt = self.generate_prompt(question, paras, history=history)
         return str(self.send_chat_message(prompt).text)
 
     @staticmethod
-    def generate_prompt(question, relevant_paras):
-        prompt = f"""Answer the question below using the data provided and your own knowledge if the data is insufficient.
-        Also, the user may ask a question using their chat history, such as "But why is this?" when their previous question
-        asked for the reactions between acid and base, for example. In this case, when you feel it is suitable, ignore the
-        data provided, as it may not be too relevant (given the data doesn't know the previous context of the chat), and reply
-        normally.
+    def generate_prompt(question, relevant_paras, history):
+        prompt = f"""Answer the question.
     {question}
-    This is the data (in order of relevance):
+    This is the data (in order of relevance):\n
     """ 
-            
-        for (i, paras) in enumerate(relevant_paras):
-            prompt += f"para {i}: {paras}"
+        if relevant_paras:
+            for (i, paras) in enumerate(relevant_paras):
+                prompt += f"para {i}: {paras}\n"
+        else:
+            prompt += "There is no relevant data, try using your own knowledge\n"
 
-        prompt += "Keep your answer a bit short where you can. Stay relevant to the question."
+        prompt += "Keep your answer a bit short where you can. Stay relevant to the question.\n"
+        prompt += "The history of this chat is: \n"
+        if history:
+            for (i, msg) in enumerate(history):
+                if i % 2 == 0:
+                    prompt += f"User: {msg}\n"
+                else:
+                    prompt += f"AI: {msg}\n"
 
         return prompt

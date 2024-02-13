@@ -57,7 +57,7 @@ def query():
 
     if subject in subject_translate:
         paras = db.find_relevent_paras(question, subject_translate[subject], 5)
-        ans = model.query(question, paras)
+        ans = model.query(question, paras, history=history)
 
         print(paras)
         print("Response is " + ans)
