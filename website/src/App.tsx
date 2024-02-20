@@ -13,6 +13,7 @@ const App = () => {
     const [history, setHistory] = useState<string[]>([]);
     const subjectList: string[] = ["Chemistry", "Physics", "Biology", "Comp Sci"];
     const { hovered, ref } = useHover();
+    const errorMsg = "Oops an error has occured";
 
     const handleSubmission = async () => {
         const questionAsked = question.trim();
@@ -23,7 +24,7 @@ const App = () => {
         setCanSend(false);
         const response = await handleSubmit(questionAsked, subject, historyToPassIn);
         if (response instanceof Error) {
-            setPrevChatArray((prevChatArray) => [...prevChatArray, "Oops an error has occured"]);
+            setPrevChatArray((prevChatArray) => [...prevChatArray, errorMsg]);
         } else {
             setPrevChatArray((prevChatArray) => [...prevChatArray, response]);
             setHistory([...history, questionAsked, response]);
@@ -33,13 +34,25 @@ const App = () => {
 
     return (
         <div className="wrapperDiv">
-            <h2 className="title">Ask AI Anything</h2>
+            <div className="titleStuff">
+                <img src="../assets/AskAILogoSVG.svg" height={150} width={150} />
+                <h2 className="title">Ask AI Anything</h2>
+            </div>
             <div className="chatBox">
                 {prevChatArray.map((msg: string, index: number) => {
                     if (index % 2 == 0) {
                         return <p key={msg + Math.random()}>You: {msg}</p>;
                     } else {
-                        return <p key={msg + Math.random()}>Ask AI: {msg}</p>;
+                        return (
+                            <p
+                                key={msg + Math.random()}
+                                style={{
+                                    color: msg == errorMsg ? "red" : "white",
+                                }}
+                            >
+                                Ask AI: {msg}
+                            </p>
+                        );
                     }
                 })}
             </div>

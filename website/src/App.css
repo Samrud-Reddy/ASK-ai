@@ -10,6 +10,12 @@ html {
     background-color: #111111;
 }
 
+.titleStuff {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .wrapperDiv {
     width: 100vw;
     height: 100vh;
