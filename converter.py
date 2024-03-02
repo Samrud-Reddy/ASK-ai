@@ -34,7 +34,7 @@ class Paragraph:
             chapter_name (str): The name of the chapter the paragraph came from
             text (str): The litreal text of the paragraph
     """
-    def __init__(self, lines: list[list[str]], textbook_name: str, subject_name:str, page: int, para_no: int, height: float, chapter: str|None = None) -> None:
+    def __init__(self, lines: list[list[str]], textbook_name: str, subject_name:str, page: int, para_no: int, height: float, chapter) -> None:
         """Initializes a paragraph
             Args:
                 lines (list[list[str]]): A list of strings each element being a list of words which might have nones

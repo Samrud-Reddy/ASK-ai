@@ -105,7 +105,7 @@ class Vector_database:
         return Paragraph(lines, item["metadata"]["textbook_name"], item["metadata"]["subject_name"], item["metadata"]["page"], item["metadata"]["para_no"], item["metadata"]["height"], item["metadata"]["chapter"])
     
 
-    def find_relevent_paras(self, query: str, subject_name: str|None = None, no_results: int = 3) -> list[Paragraph]:
+    def find_relevent_paras(self, query: str, subject_name, no_results: int = 3) -> list[Paragraph]:
         query_vector = self.get_embedings_for_retrival_query(query)
 
         if subject_name:
