@@ -46,7 +46,7 @@ class Llm:
             for (i, paras) in enumerate(relevant_paras):
                 prompt += f"para {i}: {paras}\n"
         else:
-            prompt += "There is no relevant data, try using your own knowledge\n"
+            prompt += "There is no relevant data, say you dont know\n"
 
         prompt += "Keep your answer a bit short where you can. Stay relevant to the question.\n"
         prompt += "The history of this chat is: \n"
